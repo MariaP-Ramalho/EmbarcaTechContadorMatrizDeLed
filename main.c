@@ -158,19 +158,35 @@ int main()
     return 0;
 }
 
+
+static volatile uint a = 0;     // Indica qual botão foi pressionado
+static volatile uint b = 0;
 // Manipulador de interrupção para os botões
 void gpio_irq_handler(uint gpio, uint32_t events)
 {
-    // Obtém o tempo atual em microssegundos
-    uint32_t current_time = to_us_since_boot(get_absolute_time());
-    // Verifica se passou tempo suficiente desde o último evento
-    if (current_time - last_time > 200000) // 200 ms de debouncing
+    static absolute_time_t last_time = {0}; // Garante que a variável mantenha seu valor entre chamadas
+    absolute_time_t current_time = get_absolute_time();
+
+    a++;
+    printf("Sem debounce: %d\n", a);
+
+    // Calcula a diferença de tempo em microsegundos
+    int64_t diff = absolute_time_diff_us(last_time, current_time);
+    printf("Tempo decorrido: %lld us\n", diff);
+
+    if (diff > 250000) // 250ms
     {
-        last_time = current_time; // Atualiza o last_time
-        interrupt_flag = 1;       // Seta flag como true
-        gpio_value = gpio;        // gpio_value recebe o valor da gpio pressionada
+        if (!gpio_get(button_a) || !gpio_get(button_b))  // Verifica se ainda está pressionado
+        {
+            b++;
+            printf("Com debounce: %d\n", b);
+            interrupt_flag = 1;
+            gpio_value = gpio;
+        }
+        last_time = current_time; // Atualiza o tempo da última interrupção válida
     }
 }
+
 
 // Calcula o índice correto na matriz de LEDs
 int getIndex(int x, int y)
@@ -254,6 +270,7 @@ void imprime_numeros(uint index, PIO pio, uint sm)
 // Inicializa os periféricos
 void init_hardware()
 {
+    stdio_init_all();
     gpio_init(led_r);              // Inicializa o pino do LED
     gpio_set_dir(led_r, GPIO_OUT); // Configura o pino como saida
 

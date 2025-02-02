@@ -23,12 +23,16 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 set(PICO_BOARD pico_w CACHE STRING "Board type")
+
 include(pico_sdk_import.cmake)
 project(main C CXX ASM)
 pico_sdk_init()
 add_executable(main main.c )
+pico_enable_stdio_uart(main 1)
+pico_enable_stdio_usb(main 1)
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/generated)
 pico_generate_pio_header(main ${CMAKE_CURRENT_LIST_DIR}/main.pio OUTPUT_DIR ${CMAKE_CURRENT_LIST_DIR}/generated)
 target_sources(main PRIVATE main.c)
 target_link_libraries(main PRIVATE pico_stdlib hardware_pio)
 pico_add_extra_outputs(main)
+
