@@ -14,14 +14,14 @@
 #define button_a 5    // Pino do botão A
 #define button_b 6    // Pino do botão B
 
-static volatile uint a = 0; 
+static volatile uint a = 0;
 static volatile uint b = 0;
 
 // Variáveis globais para controle do sistema
 static volatile uint32_t last_time = 0;  // Último tempo registrado para debounce
 static volatile bool interrupt_flag = 0; // Flag para indicar interrupção
 static volatile uint gpio_value = 0;     // Indica qual botão foi pressionado
-static volatile uint index = -1;         // Índice do número exibido
+static volatile uint index = 0;         // Índice do número exibido
 
 // Declaração das funções
 static void gpio_irq_handler(uint gpio, uint32_t events);
@@ -114,6 +114,8 @@ int main()
 
     ws2812_program_init(pio, sm, offset, WS2812_PIN, 800000, IS_RGBW);
 
+    desenho_pio(numero_0, 0, pio, sm, 0.0, 0.0, 0.1);
+
     while (1)
     {
         // Faz o LED piscar
@@ -176,7 +178,7 @@ void gpio_irq_handler(uint gpio, uint32_t events)
 
     if (diff > 250000) // 250ms
     {
-        if (!gpio_get(button_a) || !gpio_get(button_b))  // Verifica se ainda está pressionado
+        if (!gpio_get(button_a) || !gpio_get(button_b)) // Verifica se ainda está pressionado
         {
             b++;
             printf("Com debounce: %d\n", b);
@@ -186,7 +188,6 @@ void gpio_irq_handler(uint gpio, uint32_t events)
         last_time = current_time; // Atualiza o tempo da última interrupção válida
     }
 }
-
 
 // Calcula o índice correto na matriz de LEDs
 int getIndex(int x, int y)
