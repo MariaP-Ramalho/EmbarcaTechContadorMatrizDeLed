@@ -14,6 +14,9 @@
 #define button_a 5    // Pino do botão A
 #define button_b 6    // Pino do botão B
 
+static volatile uint a = 0; 
+static volatile uint b = 0;
+
 // Variáveis globais para controle do sistema
 static volatile uint32_t last_time = 0;  // Último tempo registrado para debounce
 static volatile bool interrupt_flag = 0; // Flag para indicar interrupção
@@ -158,9 +161,6 @@ int main()
     return 0;
 }
 
-
-static volatile uint a = 0;     // Indica qual botão foi pressionado
-static volatile uint b = 0;
 // Manipulador de interrupção para os botões
 void gpio_irq_handler(uint gpio, uint32_t events)
 {
